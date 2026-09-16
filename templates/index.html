@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CyberGuard AI</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  </head>
+  <body data-logged-in="{{ 'true' if user else 'false' }}">
+    <div class="page-shell">
+      <nav class="topbar">
+        <div class="brand-box">
+          <div class="brand-mark">C</div>
+          <div>
+            <div class="brand-name">CyberGuard AI</div>
+            <small>AI-Powered Cyber Security Assistant</small>
+          </div>
+        </div>
+
+        {% if user %}
+          <div class="top-actions">
+            <button id="themeToggle" class="icon-button" type="button">🌙</button>
+            <div class="user-pill">
+              <span class="user-avatar">{{ user.name[0]|upper }}</span>
+              <div>
+                <strong>{{ user.name }}</strong>
+                <small>{{ user.role|capitalize }}</small>
+              </div>
+            </div>
+            <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+          </div>
+        {% else %}
+          <div class="top-actions">
+            <button id="themeToggle" class="icon-button" type="button">🌙</button>
+            <a href="#authSection" class="primary-btn small">Login</a>
+          </div>
+        {% endif %}
+      </nav>
+
+      {% if not user %}
+        <main class="landing-page">
+          <section class="hero">
+            <div class="hero-copy">
+              <p class="eyebrow">AI cyber security assistant</p>
+              <h1>Smart Protection.<br />Stronger Tomorrow.</h1>
+              <p class="lead">
+                Detect phishing emails, analyze password strength, scan URLs, learn cyber safety habits,
+                and explore AI-powered guidance in one place.
+              </p>
+
+              <div class="cta-row">
+                <a href="#authSection" class="primary-btn">Get Started</a>
+                <a href="#features" class="secondary-btn">Explore Features</a>
+              </div>
+
+              <div class="feature-mini-grid" id="features">
+                <div class="mini-card">
+                  <span>📧</span>
+                  <h4>Email Detector</h4>
+                  <p>Check if an email is safe, suspicious, or phishing.</p>
+                </div>
+                <div class="mini-card">
+                  <span>🔐</span>
+                  <h4>Password Checker</h4>
+                  <p>Get strength score and secure password suggestions.</p>
+                </div>
+                <div class="mini-card">
+                  <span>🔗</span>
+                  <h4>URL Safety</h4>
+                  <p>Scan a website link for suspicious patterns.</p>
+                </div>
+                <div class="mini-card">
+                  <span>🤖</span>
+                  <h4>AI Chatbot</h4>
+                  <p>Ask cyber safety questions in simple language.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="auth-panel" id="authSection">
+              <div class="auth-tabs">
+                <button type="button" class="auth-tab active" data-target="loginPanel">Login</button>
+                <button type="button" class="auth-tab" data-target="signupPanel">Sign Up</button>
+              </div>
+
+              <div id="loginPanel" class="auth-body active">
+                <h3>Welcome Back!</h3>
+                <form id="loginForm" class="auth-form">
+                  <label>
+                    <span>Email</span>
+                    <input type="email" name="email" placeholder="Enter your email" required />
+                  </label>
+                  <label>
+                    <span>Password</span>
+                    <input type="password" name="password" placeholder="Enter your password" required />
+                  </label>
+                  <button type="submit" class="primary-btn full">Login</button>
+                </form>
+              </div>
+
+              <div id="signupPanel" class="auth-body">
+                <h3>Create New Account</h3>
+                <form id="signupForm" class="auth-form">
+                  <label>
+                    <span>Full Name</span>
+                    <input type="text" name="name" placeholder="Enter your full name" required />
+                  </label>
+                  <label>
+                    <span>Email</span>
+                    <input type="email" name="email" placeholder="Enter your email" required />
+                  </label>
+                  <label>
+                    <span>Password</span>
+                    <input type="password" name="password" placeholder="Create a password" required />
+                  </label>
+                  <button type="submit" class="primary-btn full">Sign Up</button>
+                </form>
+              </div>
+
+              <div class="demo-box">
+                <strong>Demo Admin</strong>
+                <p>Email: admin@cyberguard.ai</p>
+                <p>Password: admin123</p>
+              </div>
+            </div>
+          </section>
+        </main>
+      {% else %}
+        <main class="dashboard-layout">
+          <aside class="sidebar">
+            <div class="sidebar-profile">
+              <div class="avatar-large">{{ user.name[0]|upper }}</div>
+              <div>
+                <h3>{{ user.name }}</h3>
+                <p>{{ user.email }}</p>
+              </div>
+            </div>
+
+            <nav class="sidebar-nav">
+              <a href="#overview">Dashboard</a>
+              <a href="#features-panel">Modules</a>
+              <a href="#chatbot-section">Chatbot</a>
+              <a href="#quiz-section">Quiz</a>
+              <a href="{{ url_for('profile') }}">Profile</a>
+              {% if user.role == 'admin' %}
+                <a href="#admin-section">Admin Panel</a>
+              {% endif %}
+            </nav>
+
+            <div class="sidebar-card small">
+              <label>Daily security tip</label>
+              <p id="dailyTipValue">Loading tip...</p>
+            </div>
+
+            <div class="sidebar-card history-card">
+              <div class="card-head">
+                <h4>Recent History</h4>
+              </div>
+              <ul id="historyList" class="history-list"></ul>
+            </div>
+          </aside>
+
+          <section class="content-panel">
+            <header class="page-header" id="overview">
+              <div>
+                <p class="eyebrow">Welcome back</p>
+                <h2>Cyber Security Dashboard</h2>
+              </div>
+              <div class="header-actions">
+                <span class="pill success">AI Assistant Active</span>
+              </div>
+            </header>
+
+            <div class="stats-grid">
+              <div class="stat-card accent">
+                <label>Total Checks</label>
+                <strong id="totalChecks">0</strong>
+              </div>
+              <div class="stat-card">
+                <label>Safe</label>
+                <strong id="safeChecks">0</strong>
+              </div>
+              <div class="stat-card warn">
+                <label>Suspicious</label>
+                <strong id="suspiciousChecks">0</strong>
+              </div>
+              <div class="stat-card danger">
+                <label>Dangerous</label>
+                <strong id="dangerousChecks">0</strong>
+              </div>
+              <div class="stat-card primary">
+                <label>Phishing Detected</label>
+                <strong id="phishingChecks">0</strong>
+              </div>
+            </div>
+
+            <div class="module-grid" id="features-panel">
+              <div class="module-card">
+                <h3>1. AI Phishing Email Detector</h3>
+                <form id="emailForm" class="module-form">
+                  <textarea name="emailText" rows="5" placeholder="Paste an email here..." required></textarea>
+                  <button type="submit" class="primary-btn">Analyze Email</button>
+                </form>
+                <div id="emailResult" class="result-box empty">Ready to analyze.</div>
+              </div>
+
+              <div class="module-card">
+                <h3>2. Password Security Checker</h3>
+                <form id="passwordForm" class="module-form">
+                  <input type="text" name="password" placeholder="Enter a password" required />
+                  <button type="submit" class="primary-btn">Check Strength</button>
+                </form>
+                <div id="passwordResult" class="result-box empty">Ready to analyze.</div>
+              </div>
+
+              <div class="module-card">
+                <h3>3. URL Safety Checker</h3>
+                <form id="urlForm" class="module-form">
+                  <input type="text" name="url" placeholder="https://example.com" required />
+                  <button type="submit" class="primary-btn">Scan URL</button>
+                </form>
+                <div id="urlResult" class="result-box empty">Ready to analyze.</div>
+              </div>
+
+              <div class="module-card">
+                <h3>4. AI Cyber Chatbot</h3>
+                <div id="chatMessages" class="chat-box">
+                  <div class="message bot">
+                    Hi! Ask me about phishing, malware, passwords, or online safety.
+                  </div>
+                </div>
+                <form id="chatForm" class="chat-form">
+                  <input type="text" name="question" placeholder="Ask a security question..." required />
+                  <button type="submit" class="primary-btn">Send</button>
+                </form>
+              </div>
+            </div>
+
+            <div class="wide-layout">
+              <div class="module-card" id="quiz-section">
+                <div class="card-head">
+                  <h3>5. Cyber Security Quiz</h3>
+                </div>
+                <form id="quizForm">
+                  <div id="quizContainer"></div>
+                  <button type="submit" class="primary-btn">Submit Quiz</button>
+                </form>
+                <div id="quizResult" class="result-box empty">Quiz not attempted yet.</div>
+              </div>
+
+              <div class="module-card">
+                <h3>6. Daily Security Tips</h3>
+                <div class="tip-list" id="tipList"></div>
+              </div>
+            </div>
+
+            <div class="module-card feedback-card">
+              <h3>User Feedback</h3>
+              <form id="feedbackForm" class="module-form inline">
+                <textarea name="message" rows="3" placeholder="Share your feedback about the app..." required></textarea>
+                <div class="form-row">
+                  <label>
+                    <span>Rating</span>
+                    <select name="rating">
+                      <option value="5">5/5</option>
+                      <option value="4">4/5</option>
+                      <option value="3">3/5</option>
+                      <option value="2">2/5</option>
+                      <option value="1">1/5</option>
+                    </select>
+                  </label>
+                  <button type="submit" class="primary-btn">Send Feedback</button>
+                </div>
+              </form>
+            </div>
+
+            {% if user.role == 'admin' %}
+              <div class="module-card admin-panel" id="admin-section">
+                <h3>Admin Panel</h3>
+                <div class="admin-grid">
+                  <form id="adminQuizForm" class="admin-form">
+                    <h4>Add Quiz Question</h4>
+                    <input type="text" name="question" placeholder="Question" required />
+                    <div class="admin-option-grid">
+                      <input type="text" name="option_a" placeholder="Option A" required />
+                      <input type="text" name="option_b" placeholder="Option B" required />
+                      <input type="text" name="option_c" placeholder="Option C" required />
+                      <input type="text" name="option_d" placeholder="Option D" required />
+                    </div>
+                    <div class="form-row compact">
+                      <label>
+                        <span>Correct option</span>
+                        <select name="correct_option">
+                          <option value="1">A</option>
+                          <option value="2">B</option>
+                          <option value="3">C</option>
+                          <option value="4">D</option>
+                        </select>
+                      </label>
+                    </div>
+                    <textarea name="explanation" rows="3" placeholder="Explain the correct answer" required></textarea>
+                    <button type="submit" class="primary-btn">Add Quiz</button>
+                  </form>
+
+                  <form id="adminTipForm" class="admin-form">
+                    <h4>Add Daily Tip</h4>
+                    <textarea name="text" rows="5" placeholder="Write a new cyber security tip..." required></textarea>
+                    <button type="submit" class="primary-btn">Add Tip</button>
+                  </form>
+                </div>
+
+                <div class="feedback-list-block">
+                  <h4>Feedback from Users</h4>
+                  <div id="feedbackList" class="feedback-list"></div>
+                </div>
+              </div>
+            {% endif %}
+          </section>
+        </main>
+      {% endif %}
+    </div>
+
+    <div id="toast" class="toast hidden"></div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  </body>
+</html>

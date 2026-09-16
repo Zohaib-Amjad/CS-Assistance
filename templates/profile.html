@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CyberGuard AI | Profile</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  </head>
+  <body data-logged-in="true">
+    <div class="page-shell">
+      <nav class="topbar">
+        <div class="brand-box">
+          <div class="brand-mark">C</div>
+          <div>
+            <div class="brand-name">CyberGuard AI</div>
+            <small>AI-Powered Cyber Security Assistant</small>
+          </div>
+        </div>
+
+        <div class="top-actions">
+          <button id="themeToggle" class="icon-button" type="button">🌙</button>
+          <div class="user-pill">
+            <span class="user-avatar">{{ user.name[0]|upper }}</span>
+            <div>
+              <strong>{{ user.name }}</strong>
+              <small>{{ user.role|capitalize }}</small>
+            </div>
+          </div>
+          <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+        </div>
+      </nav>
+
+      <main class="profile-shell">
+        <aside class="sidebar profile-sidebar">
+          <div class="sidebar-profile">
+            <div class="avatar-large">{{ user.name[0]|upper }}</div>
+            <div>
+              <h3>{{ user.name }}</h3>
+              <p>{{ user.email }}</p>
+            </div>
+          </div>
+
+          <nav class="sidebar-nav">
+            <a href="{{ url_for('index') }}#overview">Dashboard</a>
+            <a href="{{ url_for('profile') }}" class="active">Profile</a>
+            {% if user.role == 'admin' %}
+              <a href="{{ url_for('index') }}#admin-section">Admin Panel</a>
+            {% endif %}
+          </nav>
+
+          <div class="sidebar-card small">
+            <label>Security snapshot</label>
+            <p>{{ stats.totalChecks }} total checks completed so far.</p>
+          </div>
+        </aside>
+
+        <section class="content-panel profile-content">
+          <header class="page-header">
+            <div>
+              <p class="eyebrow">Profile & Activity</p>
+              <h2>User Overview</h2>
+            </div>
+            <div class="header-actions">
+              <a href="{{ url_for('export_report') }}" class="primary-btn">Export PDF Report</a>
+            </div>
+          </header>
+
+          <div class="stats-grid profile-stats">
+            <div class="stat-card accent">
+              <label>Total Checks</label>
+              <strong>{{ stats.totalChecks }}</strong>
+            </div>
+            <div class="stat-card">
+              <label>Safe</label>
+              <strong>{{ stats.safeChecks }}</strong>
+            </div>
+            <div class="stat-card warn">
+              <label>Suspicious</label>
+              <strong>{{ stats.suspiciousChecks }}</strong>
+            </div>
+            <div class="stat-card danger">
+              <label>Dangerous</label>
+              <strong>{{ stats.dangerousChecks }}</strong>
+            </div>
+            <div class="stat-card primary">
+              <label>Phishing Detected</label>
+              <strong>{{ stats.phishingChecks }}</strong>
+            </div>
+          </div>
+
+          <div class="profile-section">
+            <h3>Recent History</h3>
+            {% if history %}
+              <div class="history-table-wrap">
+                <table class="history-table">
+                  <thead>
+                    <tr>
+                      <th>Module</th>
+                      <th>Result</th>
+                      <th>Details</th>
+                      <th>Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for item in history %}
+                      <tr>
+                        <td>{{ item.module }}</td>
+                        <td><span class="result-pill {{ item.result|lower }}">{{ item.result }}</span></td>
+                        <td>{{ item.details }}</td>
+                        <td>{{ item.created_at }}</td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            {% else %}
+              <div class="result-box empty">No activity has been recorded yet.</div>
+            {% endif %}
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div id="toast" class="toast hidden"></div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  </body>
+</html>

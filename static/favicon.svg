@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="CyberGuard AI favicon">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7d5cff"/>
+      <stop offset="100%" stop-color="#a287ff"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="18" fill="url(#bg)"/>
+  <path d="M22 18h20v6H22zm0 11h20v6H22zm0 11h14v6H22z" fill="#ffffff" fill-opacity="0.95"/>
+  <circle cx="47" cy="46" r="7" fill="#5fd3a8"/>
+  <path d="M44 46l2.2 2.2 4.4-5" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
