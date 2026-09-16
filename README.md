@@ -56,6 +56,12 @@ python app.py
 http://127.0.0.1:5000
 ```
 
+## Deploy to Vercel
+
+This repository includes a Vercel configuration for the Flask application. Import the GitHub repository into Vercel and add `FLASK_SECRET_KEY` as an environment variable before deploying.
+
+The default Vercel database path uses temporary storage, so user accounts and activity data are not persistent across serverless instances. Use an external PostgreSQL database before production use.
+
 ## Admin Login
 
 - Email: admin@cyberguard.ai
