@@ -21,7 +21,12 @@ from sklearn.pipeline import Pipeline
 from werkzeug.security import check_password_hash, generate_password_hash
 
 BASE_DIR = Path(__file__).resolve().parent
-DB_PATH = BASE_DIR / "cyberguard.db"
+DB_PATH = Path(
+    os.environ.get(
+        "DB_PATH",
+        "/tmp/cyberguard.db" if os.environ.get("VERCEL") else str(BASE_DIR / "cyberguard.db"),
+    )
+)
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "cyberguard-secret-key")
