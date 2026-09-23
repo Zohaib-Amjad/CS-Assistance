@@ -1,6 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
   setupThemeToggle();
   setupAuthTabs();
+  setupSidebarNavigation();
+  setupDashboardAdminNavigation();
+  setupProfileSidebar();
 
   if (document.body.dataset.loggedIn === 'true') {
     loadDashboard();
@@ -43,6 +46,179 @@ function setupAuthTabs() {
       });
     });
   });
+}
+
+function setupSidebarNavigation() {
+  const sidebarLinks = document.querySelectorAll('.sidebar-nav a[href^="#"]');
+
+  if (!sidebarLinks.length) return;
+
+  const centerActiveSidebarLink = (sidebar) => {
+    const activeLink = sidebar.querySelector('.sidebar-nav a.active');
+    if (!activeLink) return;
+
+    const sidebarTop = sidebar.scrollTop;
+    const sidebarCenter = sidebarTop + (sidebar.clientHeight / 2);
+    const itemCenter = activeLink.offsetTop + (activeLink.offsetHeight / 2);
+    const distance = itemCenter - sidebarCenter;
+
+    if (Math.abs(distance) < 20) return;
+
+    const maxScroll = sidebar.scrollHeight - sidebar.clientHeight;
+    sidebar.scrollTop = Math.min(Math.max(sidebarTop + distance, 0), maxScroll);
+  };
+
+  const setActiveLink = (activeLink) => {
+    sidebarLinks.forEach((link) => {
+      link.classList.toggle('active', link === activeLink);
+    });
+
+    const sidebar = activeLink.closest('.sidebar');
+    if (sidebar) {
+      centerActiveSidebarLink(sidebar);
+    }
+  };
+
+  sidebarLinks.forEach((link) => {
+    link.addEventListener('click', (event) => {
+      const targetId = link.getAttribute('href');
+      if (!targetId || targetId === '#') return;
+
+      const target = document.querySelector(targetId);
+      if (target) {
+        event.preventDefault();
+        setActiveLink(link);
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        history.replaceState(null, '', targetId);
+      }
+    });
+  });
+
+  const currentHash = window.location.hash;
+  if (currentHash) {
+    const matchingLink = [...sidebarLinks].find((link) => link.getAttribute('href') === currentHash);
+    if (matchingLink) {
+      setActiveLink(matchingLink);
+    }
+  }
+}
+
+function setupProfileSidebar() {
+  const navItems = document.querySelectorAll('.nav-item[data-target]');
+  const panels = document.querySelectorAll('.detail-panel');
+
+  if (!navItems.length || !panels.length) return;
+
+  const centerActiveSidebarItem = (sidebar) => {
+    const activeItem = sidebar.querySelector('.nav-item.active');
+    if (!activeItem) return;
+
+    const sidebarTop = sidebar.scrollTop;
+    const sidebarCenter = sidebarTop + (sidebar.clientHeight / 2);
+    const itemCenter = activeItem.offsetTop + (activeItem.offsetHeight / 2);
+    const distance = itemCenter - sidebarCenter;
+
+    if (Math.abs(distance) < 20) return;
+
+    const maxScroll = sidebar.scrollHeight - sidebar.clientHeight;
+    sidebar.scrollTop = Math.min(Math.max(sidebarTop + distance, 0), maxScroll);
+  };
+
+  navItems.forEach((item) => {
+    item.addEventListener('click', (event) => {
+      event.preventDefault();
+      const target = item.dataset.target;
+
+      navItems.forEach((nav) => {
+        if (nav === item) {
+          nav.classList.add('active');
+        } else if (nav.closest('.submenu') === null) {
+          nav.classList.remove('active');
+        }
+      });
+
+      panels.forEach((panel) => {
+        panel.classList.toggle('active', panel.dataset.panel === target);
+      });
+
+      const sidebar = item.closest('.sidebar');
+      if (sidebar) {
+        centerActiveSidebarItem(sidebar);
+      }
+    });
+  });
+}
+
+function setupDashboardAdminNavigation() {
+  const adminLinks = document.querySelectorAll('.admin-group [data-admin-target]');
+  const contentPanel = document.querySelector('.dashboard-layout .content-panel');
+
+  if (!adminLinks.length || !contentPanel) return;
+
+  const overview = contentPanel.querySelector('#overview');
+  const stats = contentPanel.querySelector('.stats-grid');
+  const modules = contentPanel.querySelector('#features-panel');
+  const chatbot = contentPanel.querySelector('#chatbot-section');
+  const quizLayout = contentPanel.querySelector('.wide-layout');
+  const quiz = contentPanel.querySelector('#quiz-section');
+  const feedback = contentPanel.querySelector('.feedback-card');
+  const adminPanel = contentPanel.querySelector('#admin-section');
+  const dashboardElements = [overview, stats, modules, quizLayout, feedback, adminPanel].filter(Boolean);
+
+  const showOnly = (target) => {
+    contentPanel.classList.remove(
+      'dashboard-view-dashboard',
+      'dashboard-view-modules',
+      'dashboard-view-chatbot',
+      'dashboard-view-quiz'
+    );
+    contentPanel.classList.add(`dashboard-view-${target}`);
+    dashboardElements.forEach((element) => element.classList.add('dashboard-view-hidden'));
+
+    if (target === 'dashboard') {
+      [overview, stats].filter(Boolean).forEach((element) => element.classList.remove('dashboard-view-hidden'));
+    }
+
+    if (target === 'modules' && modules) {
+      modules.classList.remove('dashboard-view-hidden');
+      modules.querySelectorAll('.module-card').forEach((card) => {
+        card.classList.toggle('dashboard-view-hidden', card === chatbot);
+      });
+    }
+
+    if (target === 'chatbot' && modules && chatbot) {
+      modules.classList.remove('dashboard-view-hidden');
+      modules.querySelectorAll('.module-card').forEach((card) => {
+        card.classList.toggle('dashboard-view-hidden', card !== chatbot);
+      });
+    }
+
+    if (target === 'quiz' && quizLayout && quiz) {
+      quizLayout.classList.remove('dashboard-view-hidden');
+      quizLayout.querySelectorAll('.module-card').forEach((card) => {
+        card.classList.toggle('dashboard-view-hidden', card !== quiz);
+      });
+    }
+  };
+
+  adminLinks.forEach((link) => {
+    link.addEventListener('click', (event) => {
+      event.preventDefault();
+      showOnly(link.dataset.adminTarget);
+      history.replaceState(null, '', link.getAttribute('href'));
+    });
+  });
+
+  const hashViews = {
+    '#overview': 'dashboard',
+    '#features-panel': 'modules',
+    '#chatbot-section': 'chatbot',
+    '#quiz-section': 'quiz'
+  };
+  const initialView = hashViews[window.location.hash];
+  if (initialView) {
+    showOnly(initialView);
+  }
 }
 
 function attachAuthHandlers() {

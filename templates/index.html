@@ -28,7 +28,6 @@
               <span class="user-avatar">{{ user.name[0]|upper }}</span>
               <div>
                 <strong>{{ user.name }}</strong>
-                <small>{{ user.role|capitalize }}</small>
               </div>
             </div>
             <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
@@ -141,14 +140,29 @@
             </div>
 
             <nav class="sidebar-nav">
-              <a href="#overview">Dashboard</a>
-              <a href="#features-panel">Modules</a>
-              <a href="#chatbot-section">Chatbot</a>
-              <a href="#quiz-section">Quiz</a>
-              <a href="{{ url_for('profile') }}">Profile</a>
               {% if user.role == 'admin' %}
-                <a href="#admin-section">Admin Panel</a>
+                <div class="nav-group admin-group admin-menu-item">
+                  <details class="profile-dropdown" open>
+                    <summary class="nav-item nav-parent has-dropdown">
+                      <span>Admin Panel</span>
+                      <span class="dropdown-icon">▾</span>
+                    </summary>
+
+                    <div class="submenu" id="admin-submenu">
+                      <a href="#overview" class="nav-item nav-child" data-admin-target="dashboard">Dashboard</a>
+                      <a href="#features-panel" class="nav-item nav-child" data-admin-target="modules">Modules</a>
+                      <a href="#chatbot-section" class="nav-item nav-child" data-admin-target="chatbot">Chatbot</a>
+                      <a href="#quiz-section" class="nav-item nav-child" data-admin-target="quiz">Quiz</a>
+                    </div>
+                  </details>
+                </div>
+              {% else %}
+                <a href="#overview">Dashboard</a>
+                <a href="#features-panel">Modules</a>
+                <a href="#chatbot-section">Chatbot</a>
+                <a href="#quiz-section">Quiz</a>
               {% endif %}
+              <a href="{{ url_for('profile') }}" class="profile-menu-item">Profile</a>
             </nav>
 
             <div class="sidebar-card small">
@@ -226,7 +240,7 @@
                 <div id="urlResult" class="result-box empty">Ready to analyze.</div>
               </div>
 
-              <div class="module-card">
+              <div class="module-card" id="chatbot-section">
                 <h3>4. AI Cyber Chatbot</h3>
                 <div id="chatMessages" class="chat-box">
                   <div class="message bot">

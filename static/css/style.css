@@ -369,9 +369,11 @@ textarea {
 
 .dashboard-layout {
   display: grid;
-  grid-template-columns: 290px 1fr;
+  grid-template-columns: 290px minmax(0, 1fr);
   gap: 26px;
   padding-top: 28px;
+  align-items: start;
+  height: calc(100vh - 120px);
 }
 
 .sidebar,
@@ -383,8 +385,27 @@ textarea {
 }
 
 .sidebar {
+  position: sticky;
+  top: 24px;
   padding: 20px;
-  height: fit-content;
+  height: calc(100vh - 140px);
+  max-height: calc(100vh - 140px);
+  overflow-y: auto;
+  align-self: start;
+}
+
+.sidebar::-webkit-scrollbar {
+  display: none;
+}
+
+.sidebar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.profile-sidebar {
+  max-height: 600px;
+  overflow-y: auto;
 }
 
 .sidebar-profile {
@@ -419,15 +440,152 @@ textarea {
 }
 
 .sidebar-nav a {
+  display: flex;
+  align-items: center;
   color: var(--text);
   text-decoration: none;
-  padding: 10px 12px;
-  border-radius: 12px;
-  background: transparent;
+  padding: 16px 18px;
+  border-radius: 18px;
+  background: rgba(125, 92, 255, 0.03);
+  border: 1px solid transparent;
+  font-size: 1.05rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
 }
 
 .sidebar-nav a:hover {
   background: var(--primary-soft);
+  border-color: rgba(124, 109, 255, 0.12);
+  transform: none;
+}
+
+.profile-nav {
+  gap: 10px;
+}
+
+.admin-menu-item {
+  order: 98;
+}
+
+.profile-menu-item {
+  order: 99;
+}
+
+.profile-group {
+  margin-top: 0;
+}
+
+.nav-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  border: 0;
+  background: rgba(125, 92, 255, 0.03);
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  color: var(--text);
+  padding: 16px 18px;
+  border-radius: 18px;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.dropdown-icon {
+  font-size: 1.2rem;
+  line-height: 1;
+  color: var(--muted);
+  transition: transform 0.2s ease;
+}
+
+summary::-webkit-details-marker {
+  display: none;
+}
+
+.profile-dropdown {
+  display: block;
+}
+
+.profile-dropdown summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+.profile-dropdown[open] .dropdown-icon {
+  transform: rotate(180deg);
+}
+
+.submenu {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-left: 18px;
+  padding-left: 12px;
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 6px;
+}
+
+.sub-submenu {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 0;
+  margin-bottom: 0;
+  margin-left: 14px;
+  padding-left: 12px;
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.nav-child,
+.nav-grandchild {
+  background: transparent !important;
+  border: none !important;
+  padding: 10px 12px !important;
+  font-weight: 500 !important;
+  color: var(--text) !important;
+  border-radius: 10px !important;
+  font-size: 1.02rem !important;
+}
+
+.nav-child {
+  margin-left: 4px;
+}
+
+.nav-grandchild {
+  padding-left: 18px !important;
+  margin-left: 4px;
+}
+
+.nav-grandchild.active {
+  background: var(--primary-soft) !important;
+  color: var(--primary) !important;
+  box-shadow: inset 0 0 0 1px rgba(124, 109, 255, 0.16);
+}
+
+.nav-child.active {
+  background: var(--primary-soft) !important;
+  color: var(--primary) !important;
+  box-shadow: inset 0 0 0 1px rgba(124, 109, 255, 0.16);
+}
+
+.nav-parent.active,
+.sidebar-nav a.active {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  color: var(--text);
+}
+
+.has-dropdown[aria-expanded="true"] {
+  background: rgba(125, 92, 255, 0.06);
+  border-radius: 18px;
 }
 
 .sidebar-card {
@@ -474,6 +632,15 @@ textarea {
 
 .content-panel {
   padding: 24px;
+  height: calc(100vh - 140px);
+  max-height: calc(100vh - 140px);
+  overflow-y: auto;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.content-panel::-webkit-scrollbar {
+  display: none;
 }
 
 .page-header {
@@ -547,6 +714,16 @@ textarea {
   display: grid;
   grid-template-columns: repeat(2, minmax(280px, 1fr));
   gap: 22px;
+}
+
+.content-panel.dashboard-view-chatbot #features-panel,
+.content-panel.dashboard-view-quiz .wide-layout {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.content-panel.dashboard-view-chatbot #chatbot-section,
+.content-panel.dashboard-view-quiz #quiz-section {
+  grid-column: 1 / -1;
 }
 
 .module-card {
@@ -747,10 +924,39 @@ textarea {
 .profile-sidebar {
   padding: 20px;
   height: fit-content;
+  max-height: calc(100vh - 160px);
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.profile-sidebar::-webkit-scrollbar {
+  display: none;
 }
 
 .profile-content {
   padding: 24px;
+  min-height: 420px;
+}
+
+.detail-panel {
+  display: none;
+}
+
+.detail-panel.active {
+  display: block;
+}
+
+.dashboard-view-hidden {
+  display: none !important;
+}
+
+.profile-info-card {
+  background: rgba(125, 92, 255, 0.04);
+  border: 1px solid rgba(124, 109, 255, 0.12);
+  border-radius: 18px;
+  padding: 20px;
+  line-height: 1.8;
 }
 
 .profile-section {
@@ -815,7 +1021,10 @@ textarea {
 }
 
 .sidebar-nav a.active {
-  background: var(--primary-soft);
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  color: var(--text);
 }
 
 .toast {

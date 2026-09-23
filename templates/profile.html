@@ -27,7 +27,6 @@
             <span class="user-avatar">{{ user.name[0]|upper }}</span>
             <div>
               <strong>{{ user.name }}</strong>
-              <small>{{ user.role|capitalize }}</small>
             </div>
           </div>
           <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
@@ -44,12 +43,53 @@
             </div>
           </div>
 
-          <nav class="sidebar-nav">
-            <a href="{{ url_for('index') }}#overview">Dashboard</a>
-            <a href="{{ url_for('profile') }}" class="active">Profile</a>
+          <nav class="sidebar-nav profile-nav">
             {% if user.role == 'admin' %}
-              <a href="{{ url_for('index') }}#admin-section">Admin Panel</a>
+              <div class="nav-group admin-group admin-menu-item">
+                <details class="profile-dropdown" open>
+                  <summary class="nav-item nav-parent has-dropdown">
+                    <span>Admin Panel</span>
+                    <span class="dropdown-icon">▾</span>
+                  </summary>
+
+                  <div class="submenu" id="admin-submenu">
+                    <a href="{{ url_for('index') }}#overview" class="nav-item nav-child">Dashboard</a>
+                    <a href="{{ url_for('index') }}#features-panel" class="nav-item nav-child">Modules</a>
+                    <a href="{{ url_for('index') }}#chatbot-section" class="nav-item nav-child">Chatbot</a>
+                    <a href="{{ url_for('index') }}#quiz-section" class="nav-item nav-child">Quiz</a>
+                  </div>
+                </details>
+              </div>
             {% endif %}
+
+            <div class="nav-group profile-group profile-menu-item">
+              <details class="profile-dropdown" open>
+                <summary class="nav-item nav-parent has-dropdown">
+                  <span>Profile</span>
+                  <span class="dropdown-icon">▾</span>
+                </summary>
+
+                <div class="submenu" id="profile-submenu">
+                  <a href="#" class="nav-item nav-child" data-target="messages">Messages</a>
+                  <a href="#" class="nav-item nav-child" data-target="settings">Settings</a>
+
+                  <div class="sub-submenu">
+                    <a href="#" class="nav-item nav-grandchild" data-target="account">Account</a>
+                    <a href="#" class="nav-item nav-grandchild" data-target="profile">Profile</a>
+                    <a href="#" class="nav-item nav-grandchild active" data-target="security">Security &amp; Privacy</a>
+                    <a href="#" class="nav-item nav-grandchild" data-target="password">Password</a>
+                    <a href="#" class="nav-item nav-grandchild" data-target="notification">Notification</a>
+                  </div>
+
+                  <a href="#" class="nav-item nav-child" data-target="help">Help</a>
+                  <div class="sub-submenu">
+                    <a href="#" class="nav-item nav-grandchild" data-target="faq">FAQ's</a>
+                    <a href="#" class="nav-item nav-grandchild" data-target="ticket">Submit a Ticket</a>
+                    <a href="#" class="nav-item nav-grandchild" data-target="network">Network Status</a>
+                  </div>
+                </div>
+              </details>
+            </div>
           </nav>
 
           <div class="sidebar-card small">
@@ -59,67 +99,147 @@
         </aside>
 
         <section class="content-panel profile-content">
-          <header class="page-header">
-            <div>
-              <p class="eyebrow">Profile & Activity</p>
-              <h2>User Overview</h2>
-            </div>
-            <div class="header-actions">
-              <a href="{{ url_for('export_report') }}" class="primary-btn">Export PDF Report</a>
-            </div>
-          </header>
+          <div class="detail-panel active" data-panel="dashboard">
+            <header class="page-header">
+              <div>
+                <p class="eyebrow">Profile & Activity</p>
+                <h2>User Overview</h2>
+              </div>
+              <div class="header-actions">
+                <a href="{{ url_for('export_report') }}" class="primary-btn">Export PDF Report</a>
+              </div>
+            </header>
 
-          <div class="stats-grid profile-stats">
-            <div class="stat-card accent">
-              <label>Total Checks</label>
-              <strong>{{ stats.totalChecks }}</strong>
+            <div class="stats-grid profile-stats">
+              <div class="stat-card accent">
+                <label>Total Checks</label>
+                <strong>{{ stats.totalChecks }}</strong>
+              </div>
+              <div class="stat-card">
+                <label>Safe</label>
+                <strong>{{ stats.safeChecks }}</strong>
+              </div>
+              <div class="stat-card warn">
+                <label>Suspicious</label>
+                <strong>{{ stats.suspiciousChecks }}</strong>
+              </div>
+              <div class="stat-card danger">
+                <label>Dangerous</label>
+                <strong>{{ stats.dangerousChecks }}</strong>
+              </div>
+              <div class="stat-card primary">
+                <label>Phishing Detected</label>
+                <strong>{{ stats.phishingChecks }}</strong>
+              </div>
             </div>
-            <div class="stat-card">
-              <label>Safe</label>
-              <strong>{{ stats.safeChecks }}</strong>
-            </div>
-            <div class="stat-card warn">
-              <label>Suspicious</label>
-              <strong>{{ stats.suspiciousChecks }}</strong>
-            </div>
-            <div class="stat-card danger">
-              <label>Dangerous</label>
-              <strong>{{ stats.dangerousChecks }}</strong>
-            </div>
-            <div class="stat-card primary">
-              <label>Phishing Detected</label>
-              <strong>{{ stats.phishingChecks }}</strong>
+
+            <div class="profile-section">
+              <h3>Recent History</h3>
+              {% if history %}
+                <div class="history-table-wrap">
+                  <table class="history-table">
+                    <thead>
+                      <tr>
+                        <th>Module</th>
+                        <th>Result</th>
+                        <th>Details</th>
+                        <th>Date</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for item in history %}
+                        <tr>
+                          <td>{{ item.module }}</td>
+                          <td><span class="result-pill {{ item.result|lower }}">{{ item.result }}</span></td>
+                          <td>{{ item.details }}</td>
+                          <td>{{ item.created_at }}</td>
+                        </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              {% else %}
+                <div class="result-box empty">No activity has been recorded yet.</div>
+              {% endif %}
             </div>
           </div>
 
-          <div class="profile-section">
-            <h3>Recent History</h3>
-            {% if history %}
-              <div class="history-table-wrap">
-                <table class="history-table">
-                  <thead>
-                    <tr>
-                      <th>Module</th>
-                      <th>Result</th>
-                      <th>Details</th>
-                      <th>Date</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {% for item in history %}
-                      <tr>
-                        <td>{{ item.module }}</td>
-                        <td><span class="result-pill {{ item.result|lower }}">{{ item.result }}</span></td>
-                        <td>{{ item.details }}</td>
-                        <td>{{ item.created_at }}</td>
-                      </tr>
-                    {% endfor %}
-                  </tbody>
-                </table>
+          <div class="detail-panel" data-panel="profile">
+            <header class="page-header">
+              <div>
+                <p class="eyebrow">Profile</p>
+                <h2>Account Information</h2>
               </div>
-            {% else %}
-              <div class="result-box empty">No activity has been recorded yet.</div>
-            {% endif %}
+            </header>
+            <div class="profile-info-card">
+              <p><strong>Name:</strong> {{ user.name }}</p>
+              <p><strong>Email:</strong> {{ user.email }}</p>
+              <p><strong>Role:</strong> {{ user.role|capitalize }}</p>
+            </div>
+          </div>
+
+          <div class="detail-panel" data-panel="messages">
+            <header class="page-header"><div><p class="eyebrow">Messages</p><h2>Inbox</h2></div></header>
+            <div class="profile-info-card">
+              <p>No new messages.</p>
+            </div>
+          </div>
+
+          <div class="detail-panel" data-panel="settings">
+            <header class="page-header"><div><p class="eyebrow">Settings</p><h2>Preferences</h2></div></header>
+            <div class="profile-info-card">
+              <p>Theme, alerts, and security preferences can be adjusted here.</p>
+            </div>
+          </div>
+
+          <div class="detail-panel" data-panel="security">
+            <header class="page-header"><div><p class="eyebrow">Security & Privacy</p><h2>Protection Center</h2></div></header>
+            <div class="profile-info-card">
+              <p>Two-factor authentication is enabled.</p>
+              <p>Recent login activity is monitored for unusual access.</p>
+            </div>
+          </div>
+
+          <div class="detail-panel" data-panel="password">
+            <header class="page-header"><div><p class="eyebrow">Password</p><h2>Change Password</h2></div></header>
+            <div class="profile-info-card">
+              <p>Use a strong, unique password with at least 12 characters.</p>
+            </div>
+          </div>
+
+          <div class="detail-panel" data-panel="notification">
+            <header class="page-header"><div><p class="eyebrow">Notification</p><h2>Alerts</h2></div></header>
+            <div class="profile-info-card">
+              <p>Email and browser notifications are active.</p>
+            </div>
+          </div>
+
+          <div class="detail-panel" data-panel="help">
+            <header class="page-header"><div><p class="eyebrow">Help</p><h2>Support Center</h2></div></header>
+            <div class="profile-info-card">
+              <p>Need assistance? Visit our help articles or contact support.</p>
+            </div>
+          </div>
+
+          <div class="detail-panel" data-panel="faq">
+            <header class="page-header"><div><p class="eyebrow">FAQ's</p><h2>Common Questions</h2></div></header>
+            <div class="profile-info-card">
+              <p>Most issues are resolved by checking your account security settings.</p>
+            </div>
+          </div>
+
+          <div class="detail-panel" data-panel="ticket">
+            <header class="page-header"><div><p class="eyebrow">Submit a Ticket</p><h2>Request Support</h2></div></header>
+            <div class="profile-info-card">
+              <p>Please provide your issue description and email for a response.</p>
+            </div>
+          </div>
+
+          <div class="detail-panel" data-panel="network">
+            <header class="page-header"><div><p class="eyebrow">Network Status</p><h2>System Health</h2></div></header>
+            <div class="profile-info-card">
+              <p>All services are operating normally.</p>
+            </div>
           </div>
         </section>
       </main>

@@ -599,38 +599,52 @@ def chatbot_reply(question: str):
 
     lowered = cleaned.lower()
 
-    if "phishing" in lowered:
-        return (
-            "Phishing is a cyber attack where scammers send fake emails, messages, or websites that try to trick you into sharing passwords, OTPs, or personal information. "
-            "Always verify the sender and never click unknown links."
-        )
+    if any(term in lowered for term in ("phishing", "fake email", "suspicious email", "scam email", "nakli email", "fraud email")):
+        return "Phishing uses fake emails, messages, or websites to steal passwords, OTPs, money, or personal data. Check the sender address, avoid urgent link requests, and open the official website yourself instead of using the message link."
 
-    if "malware" in lowered:
-        return (
-            "Malware is harmful software such as viruses, trojans, ransomware, or spyware. It can damage devices, steal data, or lock files. "
-            "Keep your software updated and avoid downloading files from untrusted sources."
-        )
+    if any(term in lowered for term in ("malware", "virus", "trojan", "spyware", "ransomware")):
+        return "Malware is harmful software such as viruses, trojans, spyware, and ransomware. If you suspect an infection, disconnect the device from the network, run a trusted security scan, update the system, and restore files from a clean backup. Do not pay or run unknown cleanup tools."
 
-    if "stay safe online" in lowered or "safe online" in lowered or "how to stay safe" in lowered:
-        return (
-            "To stay safe online, use strong passwords, enable two-factor authentication, update software regularly, avoid suspicious links, and never share OTPs with anyone."
-        )
+    if any(term in lowered for term in ("safe online", "stay safe", "protect myself", "security tips", "online safe", "internet safe", "mehfooz", "hifazat")):
+        return "Use a unique password for every account, enable two-factor authentication, install updates, keep backups, avoid suspicious links and downloads, and never share an OTP or recovery code."
 
-    if "strong password" in lowered or "password" in lowered:
-        return (
-            "A strong password should be long, unique, and include uppercase letters, lowercase letters, numbers, and special characters. "
-            "For example: BrightWave42!"
-        )
+    if any(term in lowered for term in ("strong password", "password", "passcode")):
+        return "Create a password of at least 12 characters that is unique to the account. A password manager can generate and store random passwords, and two-factor authentication adds another layer of protection."
 
-    if "otp" in lowered:
-        return "Never share your OTP with anyone, even if the request seems urgent or comes from someone claiming to be your bank or a company."
+    if any(term in lowered for term in ("otp", "verification code", "one-time password")):
+        return "Never share an OTP or verification code with anyone. If you did not request it, change your password and contact the service through its official support channel."
 
-    if "two-factor" in lowered or "2fa" in lowered:
-        return "Two-factor authentication adds an extra verification step, making it much harder for attackers to access your account even if your password is exposed."
+    if any(term in lowered for term in ("two-factor", "2fa", "multi-factor", "mfa")):
+        return "Two-factor authentication requires a second proof of identity after your password. Prefer an authenticator app or security key where available, and save recovery codes somewhere safe."
 
-    return (
-        "I can help with phishing, malware, online safety, passwords, and general cyber security tips. Try asking: 'What is phishing?' or 'How can I create a strong password?'"
-    )
+    if any(term in lowered for term in ("hacked", "hacking", "account stolen", "account compromised", "hack ho", "hack hua", "account chori")):
+        return "If an account may be compromised, change its password from a trusted device, sign out of other sessions, enable two-factor authentication, check recovery details, and contact the provider using its official website."
+
+    if any(term in lowered for term in ("public wifi", "public wi-fi", "coffee shop wifi", "wifi safe", "wi-fi safe")):
+        return "Avoid sensitive logins on unknown public Wi-Fi. Use mobile data or a trusted VPN, confirm HTTPS, disable automatic connection, and never accept unexpected certificate warnings."
+
+    if any(term in lowered for term in ("url", "website safe", "link safe", "website suspicious")):
+        return "Before opening a link, inspect the domain carefully, watch for misspellings and unusual subdomains, and avoid shortened or urgent links. Type the official address manually when in doubt."
+
+    if any(term in lowered for term in ("backup", "back up", "recover files")):
+        return "Keep at least one recent backup disconnected from the device or protected from ordinary account access. Test that files can actually be restored, especially for important documents and photos."
+
+    if any(term in lowered for term in ("privacy", "personal data", "tracking", "raazdari", "data safe")):
+        return "Share the minimum personal information necessary, review app permissions, use privacy-focused account settings, and remove apps or browser extensions you no longer trust."
+
+    if any(term in lowered for term in ("firewall", "antivirus", "security software")):
+        return "A firewall controls unwanted network connections, while security software helps detect malicious files and behavior. Keep both enabled, update them automatically, and do not install tools from pop-up advertisements."
+
+    if any(term in lowered for term in ("encryption", "encrypt")):
+        return "Encryption converts readable data into protected data that requires a key to open. Use HTTPS, encrypted device storage, and end-to-end encrypted messaging for sensitive information."
+
+    if any(term in lowered for term in ("social engineering", "scammer", "online scam")):
+        return "Social engineering manipulates people rather than breaking technology. Slow down, verify unusual requests through a separate trusted channel, and refuse pressure to share money, passwords, or codes."
+
+    if any(term in lowered for term in ("cyber security", "cybersecurity", "information security", "cyber safety", "security kya")):
+        return "Cyber security protects devices, accounts, networks, and data from unauthorized access or damage. Start with updates, unique passwords, two-factor authentication, safe browsing, and tested backups."
+
+    return "I can help explain phishing, malware, passwords, OTPs, two-factor authentication, suspicious links, hacked accounts, public Wi-Fi, privacy, backups, encryption, and online scams. Please ask a specific security question and I will guide you step by step."
 
 
 @app.route("/")
