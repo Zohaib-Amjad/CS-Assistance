@@ -49,8 +49,9 @@ export const passwordLogSchema = z.object({
 });
 
 export const quizSubmissionSchema = z.object({
-  answers: z.record(z.number()),
-  timeTakenSec: z.number().min(0),
+  quizId: z.string().optional(),
+  answers: z.record(z.union([z.string(), z.number()])),
+  timeTakenSec: z.number().min(0).default(0),
 });
 
 export const profileUpdateSchema = z.object({

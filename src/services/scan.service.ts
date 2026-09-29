@@ -12,6 +12,7 @@ import {
 } from "@/db/schema";
 import { eq, desc, and } from "drizzle-orm";
 import { recalculateSecurityScore } from "./user.service";
+import { checkAchievements } from "./achievement.service";
 
 export interface CreateScanInput {
   userId: string;
@@ -114,8 +115,9 @@ export async function createScanRecord(input: CreateScanInput) {
     }
   }
 
-  // Recalculate dynamic user security score
+  // Recalculate dynamic user security score and check achievements
   await recalculateSecurityScore(input.userId);
+  await checkAchievements(input.userId).catch(() => {});
 
   return newScan;
 }

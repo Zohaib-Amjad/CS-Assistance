@@ -2,6 +2,7 @@ import { db } from "@/db";
 import { chatMessages, chatConversations, activityLogs } from "@/db/schema";
 import { eq, and, asc, desc } from "drizzle-orm";
 import { getAIProvider } from "@/lib/ai";
+import { checkAchievements } from "./achievement.service";
 
 /**
  * Get all conversations for a specific user.
@@ -229,6 +230,11 @@ export async function sendChatMessage(
     } catch (err) {
       console.warn("Failed to insert chat activity log:", err);
     }
+  }
+
+  // Trigger achievement evaluation for Curious Mind
+  if (userId) {
+    await checkAchievements(userId).catch(() => {});
   }
 
   const updatedConv = await db.query.chatConversations.findFirst({

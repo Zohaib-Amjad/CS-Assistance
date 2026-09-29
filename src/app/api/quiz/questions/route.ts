@@ -1,12 +1,18 @@
 import { NextResponse } from "next/server";
-import { getQuizQuestions } from "@/services/quiz.service";
+import { getQuizQuestionsSanitized } from "@/services/quiz.service";
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
-    const questions = await getQuizQuestions(10);
+    const { searchParams } = new URL(req.url);
+    const limit = parseInt(searchParams.get("limit") || "10", 10);
+    const quizId = searchParams.get("quizId") || undefined;
+    const category = searchParams.get("category") || undefined;
+    const difficulty = searchParams.get("difficulty") || undefined;
+
+    const questions = await getQuizQuestionsSanitized({ limit, quizId, category, difficulty });
     return NextResponse.json({
       success: true,
-      data: { questions },
+      data: { questions, totalQuestions: questions.length },
     });
   } catch (error) {
     console.error("Fetch quiz questions error:", error);

@@ -1,50 +1,92 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/auth";
-import { db } from "@/db";
-import { users } from "@/db/schema";
-import { desc } from "drizzle-orm";
-import { getUserById } from "@/services/user.service";
+import { requireAdminApi } from "@/lib/auth-helpers";
+import { getUsersAdmin, createUserAdmin } from "@/services/admin.service";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
-    const session = await auth();
-    if (!session?.user?.id) {
+    const authCheck = await requireAdminApi();
+    if (authCheck.error) {
       return NextResponse.json(
-        { success: false, error: { code: "UNAUTHORIZED", message: "Authentication required." } },
-        { status: 401 }
+        { success: false, error: { code: "UNAUTHORIZED", message: authCheck.error } },
+        { status: authCheck.status }
       );
     }
 
-    const adminUser = await getUserById(session.user.id);
-    if (!adminUser || adminUser.role !== "admin") {
-      return NextResponse.json(
-        { success: false, error: { code: "FORBIDDEN", message: "Admin privileges required." } },
-        { status: 403 }
-      );
-    }
+    const { searchParams } = new URL(req.url);
+    const search = searchParams.get("search") || undefined;
+    const status = searchParams.get("status") || undefined;
+    const role = searchParams.get("role") || undefined;
+    const plan = searchParams.get("plan") || undefined;
+    const page = parseInt(searchParams.get("page") || "1", 10);
+    const limit = parseInt(searchParams.get("limit") || "10", 10);
+    const sortBy = searchParams.get("sortBy") || undefined;
+    const sortOrder = (searchParams.get("sortOrder") as "asc" | "desc") || undefined;
 
-    const allUsers = await db.query.users.findMany({
-      orderBy: [desc(users.createdAt)],
-    });
-
-    const sanitizedUsers = allUsers.map((u: any) => {
-      const { passwordHash, ...safe } = u;
-      return safe;
+    const result = await getUsersAdmin({
+      search,
+      status,
+      role,
+      plan,
+      page,
+      limit,
+      sortBy,
+      sortOrder,
     });
 
     return NextResponse.json({
       success: true,
-      data: {
-        users: sanitizedUsers,
-      },
+      data: result,
     });
-  } catch (error) {
-    console.error("Admin users fetch error:", error);
+  } catch (error: any) {
+    console.error("Admin fetch users error:", error);
     return NextResponse.json(
-      { success: false, error: { code: "INTERNAL_ERROR", message: "Failed to fetch users list." } },
+      { success: false, error: { code: "INTERNAL_ERROR", message: error.message || "Failed to fetch users." } },
       { status: 500 }
+    );
+  }
+}
+
+export async function POST(req: Request) {
+  try {
+    const authCheck = await requireAdminApi();
+    if (authCheck.error || !authCheck.user) {
+      return NextResponse.json(
+        { success: false, error: { code: "UNAUTHORIZED", message: authCheck.error } },
+        { status: authCheck.status || 401 }
+      );
+    }
+
+    const body = await req.json();
+    const { name, email, password, role, plan, status, country } = body;
+
+    if (!name || !email) {
+      return NextResponse.json(
+        { success: false, error: { code: "VALIDATION_ERROR", message: "Name and email are required." } },
+        { status: 400 }
+      );
+    }
+
+    const created = await createUserAdmin(authCheck.user.id, authCheck.user.email, {
+      name,
+      email,
+      password,
+      role,
+      plan,
+      status,
+      country,
+    });
+
+    return NextResponse.json({
+      success: true,
+      data: created,
+    });
+  } catch (error: any) {
+    console.error("Admin create user error:", error);
+    return NextResponse.json(
+      { success: false, error: { code: "CREATE_ERROR", message: error.message || "Failed to create user." } },
+      { status: 400 }
     );
   }
 }

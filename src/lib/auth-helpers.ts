@@ -33,3 +33,21 @@ export async function requireAdmin() {
   }
   return user;
 }
+
+export async function requireAdminApi() {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { error: "Authentication required", status: 401 as const };
+  }
+  const user = await getUserById(session.user.id);
+  if (!user) {
+    return { error: "User not found", status: 401 as const };
+  }
+  if (user.status && user.status.toUpperCase() !== "ACTIVE") {
+    return { error: "Account is inactive or suspended", status: 403 as const };
+  }
+  if (user.role?.toUpperCase() !== "ADMIN") {
+    return { error: "Access denied. Administrator privileges required.", status: 403 as const };
+  }
+  return { user };
+}
