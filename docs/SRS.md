@@ -1,105 +1,64 @@
-# Software Requirements Specification (SRS)
+# 📋 Software Requirements Specification (SRS) — CyberGuard AI
 
 ## 1. Introduction
+### 1.1 Purpose
+The purpose of CyberGuard AI is to provide a proactive, AI-driven cybersecurity awareness, behavioral analysis, and threat intelligence system. It combines heuristic scanning engines, artificial intelligence (Google Gemini), gamified LMS learning, and enterprise SOC administration into a single cohesive platform.
 
-The AI Cyber Security Assistant is a web application designed to help users understand and respond to common cyber security threats. The system uses a simple AI-assisted approach to classify suspicious emails, analyze password strength, scan URLs, answer basic cyber questions, and provide security guidance.
+### 1.2 Scope
+- Automated phishing detection for suspicious emails and Pakistani banking scams.
+- Malicious URL and SSRF-resistant website safety verification.
+- Zero-knowledge password entropy and breach analysis.
+- Multi-turn conversational AI security advisory chatbot.
+- Gamified cybersecurity training with server-graded quizzes and badge achievements.
+- Administrative telemetry, audit logging, and domain blocklisting.
 
-## 2. Purpose
+---
 
-The purpose of the system is to raise cyber security awareness and provide students with a practical FYP project that combines web development, Python programming, AI concepts, and database usage.
+## 2. Overall Description
+### 2.1 Product Perspective
+CyberGuard AI operates as a modern cloud-native web application built on Next.js 14 App Router, TypeScript, TailwindCSS, Drizzle ORM, and SQLite/Turso.
 
-## 3. Scope
+### 2.2 User Classes and Characteristics
+- **Standard User**: Can run scans (Email, URL, Password), take quizzes, view personal telemetry, customize profile, and consult the AI Security Copilot.
+- **SOC Administrator**: Can access `/admin`, inspect aggregated platform telemetry, manage users (+Add, Edit, Deactivate, Delete), manage quiz curricula, review privacy-sanitized logs, and update malicious domain blocklists.
 
-The system covers the following core modules:
+---
 
-- Phishing Email Detector
-- Password Security Checker
-- URL Safety Checker
-- AI Cyber Chatbot
-- Cyber Security Quiz
-- Daily Cyber Security Tips
+## 3. Functional Requirements
 
-The system also includes:
+### 3.1 Authentication & Authorization
+- **FR-AUTH-01**: The system shall authenticate users via email and bcrypt-hashed passwords.
+- **FR-AUTH-02**: The system shall lock accounts for 10 minutes upon 5 consecutive failed login attempts.
+- **FR-AUTH-03**: The system shall support password reset tokens with session invalidation via `tokenVersion`.
+- **FR-AUTH-04**: The system shall enforce role-based access control (RBAC) preventing `USER` roles from reaching `/admin` or `/api/admin/*`.
 
-- login/signup
-- dashboard
-- admin panel
-- feedback module
+### 3.2 Email Phishing Analysis Engine
+- **FR-EMAIL-01**: The system shall detect urgency phrases, credential harvesting patterns, and Pakistani bank lookalikes (HBL, Meezan, Easypaisa, JazzCash, FBR).
+- **FR-EMAIL-02**: The system shall invoke Gemini AI with structured prompts when confidence threshold requires deep analysis.
+- **FR-EMAIL-03**: The system shall never persist or display raw email body text in administrative logs.
 
-## 4. Functional Requirements
+### 3.3 SSRF-Resistant URL Scanner
+- **FR-URL-01**: The system shall reject non-HTTP/HTTPS protocols (e.g. `file://`, `gopher://`).
+- **FR-URL-02**: The system shall block loopback (`127.0.0.1`), RFC 1918 private subnets, and cloud metadata IPs (`169.254.169.254`).
+- **FR-URL-03**: The system shall calculate Levenshtein distance against known authentic domains to flag typo-squatting homoglyphs.
 
-### 4.1 User Registration and Login
-- User can create an account with name, email, and password.
-- User can log in to access dashboard features.
-- Admin account is pre-seeded in the system.
+### 3.4 Password Entropy & Security
+- **FR-PASS-01**: The system shall evaluate password entropy, crack times, and NIST SP 800-63B conformance in-memory.
+- **FR-PASS-02**: The system shall never save evaluated passwords to disk or database.
 
-### 4.2 Email Detector
-- User pastes an email or message text.
-- System classifies it as Safe, Suspicious, or Phishing.
-- System explains the reason behind the decision.
+### 3.5 Cyber Quiz & Learning LMS
+- **FR-QUIZ-01**: The system shall deliver quiz questions without answers to the client (`/api/quiz/start`).
+- **FR-QUIZ-02**: The system shall grade attempts strictly server-side (`/api/quiz/submit`).
+- **FR-QUIZ-03**: The system shall unlock achievement badges upon reaching score/attempt milestones.
 
-### 4.3 Password Checker
-- User enters a password.
-- System evaluates the password strength.
-- System lists weaknesses.
-- System suggests a stronger password.
+### 3.6 SOC Admin Management
+- **FR-ADM-01**: The system shall prevent administrators from deleting, debarring, or demoting themselves.
+- **FR-ADM-02**: The system shall record all administrative mutations into an immutable `audit_logs` table.
 
-### 4.4 URL Safety Checker
-- User enters a URL.
-- System checks for suspicious or dangerous indicators.
-- System returns Safe, Suspicious, or Dangerous.
+---
 
-### 4.5 AI Cyber Chatbot
-- User can ask common cyber security questions.
-- System responds in simple language.
-- Responses are based on predefined rules.
-
-### 4.6 Quiz Module
-- System displays multiple-choice questions.
-- User answers all questions.
-- System calculates score.
-- System shows correct answers and explanations.
-
-### 4.7 Daily Security Tips
-- System displays a daily tip from the database.
-- Admin can add more tips.
-
-### 4.8 Admin Panel
-- Admin can add new quiz questions.
-- Admin can add new daily tips.
-- Admin can view feedback from users.
-
-### 4.9 Feedback Module
-- Logged-in users can submit feedback and rating.
-
-## 5. Non-Functional Requirements
-
-- User-friendly interface
-- Responsive layout for desktop and smaller screens
-- Fast response time for local use
-- Secure password hashing
-- SQLite-based local storage
-- Basic error handling and validation
-
-## 6. Constraints
-
-- The phishing detection is rule-based in the current version.
-- AI chatbot replies are predefined, not trained with a large language model.
-- The application is designed for local/demo deployment.
-
-## 7. Assumptions
-
-- Users will access the system through a browser.
-- Admin credentials are pre-created for demonstration purposes.
-- SQLite is sufficient for the project scope.
-
-## 8. Success Criteria
-
-The system is considered successful if it can:
-
-- detect suspicious email patterns
-- assess password strength
-- classify websites safely
-- respond to basic cyber security questions
-- provide a quiz and score result
-- support admin tasks easily
+## 4. Non-Functional Requirements
+- **NFR-SEC-01**: Enforce Content Security Policy (CSP), HSTS, X-Frame-Options DENY, and noindex headers.
+- **NFR-PERF-01**: Page loads and API scanner responses shall complete within $\le 2.0$ seconds under normal load.
+- **NFR-RESP-01**: Application shall be fully responsive across screen widths from 320px to 1920px.
+- **NFR-A11Y-01**: Interactive elements shall adhere to WCAG 2.1 AA contrast and accessibility standards with minimum 44px touch targets.
