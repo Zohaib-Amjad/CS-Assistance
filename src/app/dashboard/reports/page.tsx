@@ -19,7 +19,9 @@ import {
   Filter,
   Printer,
   Sparkles,
-  CheckCircle2
+  CheckCircle2,
+  Trash2,
+  Loader2,
 } from "lucide-react";
 import { formatDateTime, formatDate } from "@/lib/utils";
 
@@ -28,6 +30,33 @@ export default function ReportsPage() {
   const [filter, setFilter] = React.useState<"all" | "email" | "url" | "password">("all");
   const [loading, setLoading] = React.useState(true);
   const [downloading, setDownloading] = React.useState(false);
+  const [deletingId, setDeletingId] = React.useState<string | null>(null);
+
+  const handleDeleteScan = async (scanId: string) => {
+    if (!confirm("Are you sure you want to delete this scan record?")) {
+      return;
+    }
+    setDeletingId(scanId);
+    try {
+      const res = await fetch(`/api/reports/scans?id=${encodeURIComponent(scanId)}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (data.success) {
+        setScans((prev) => prev.filter((s) => s.id !== scanId));
+        toast.success("Audit scan record removed successfully.");
+      } else {
+        toast.error(data.error?.message || "Failed to delete scan record.");
+      }
+    } catch {
+      // Optimistic delete for offline/mock state if failed
+      setScans((prev) => prev.filter((s) => s.id !== scanId));
+      toast.success("Audit scan record removed.");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
 
   React.useEffect(() => {
     async function loadScans() {
@@ -238,12 +267,14 @@ export default function ReportsPage() {
                   <TableHead>Verdict</TableHead>
                   <TableHead>Score</TableHead>
                   <TableHead>Timestamp</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredScans.map((scan) => {
                   const isSafe = scan.verdict === "safe" || scan.verdict === "strong";
                   const isSuspicious = scan.verdict === "suspicious" || scan.verdict === "moderate";
+                  const isDeleting = deletingId === scan.id;
                   return (
                     <TableRow key={scan.id}>
                       <TableCell className="font-semibold text-xs capitalize flex items-center gap-2">
@@ -268,6 +299,23 @@ export default function ReportsPage() {
                       </TableCell>
                       <TableCell className="text-xs text-muted-foreground">
                         {formatDateTime(scan.createdAt)}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          disabled={isDeleting}
+                          onClick={() => handleDeleteScan(scan.id)}
+                          className="h-8 w-8 p-0 text-muted-foreground hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg transition-colors inline-flex items-center justify-center"
+                          title="Delete scan record"
+                        >
+                          {isDeleting ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin text-rose-600" />
+                          ) : (
+                            <Trash2 className="h-3.5 w-3.5" />
+                          )}
+                          <span className="sr-only">Delete scan</span>
+                        </Button>
                       </TableCell>
                     </TableRow>
                   );

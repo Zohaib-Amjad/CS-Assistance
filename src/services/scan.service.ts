@@ -258,3 +258,17 @@ export async function getTopThreats(userId: string, limit = 5) {
     )
     .slice(0, limit);
 }
+
+export async function deleteScanRecord(scanId: string, userId: string) {
+  const deleted = await db
+    .delete(scans)
+    .where(and(eq(scans.id, scanId), eq(scans.userId, userId)))
+    .returning();
+
+  if (deleted.length > 0) {
+    await recalculateSecurityScore(userId).catch(() => {});
+  }
+
+  return deleted.length > 0;
+}
+
