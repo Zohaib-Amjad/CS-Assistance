@@ -41,7 +41,7 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     const body = await req.json().catch(() => ({}));
-    const { quizId, category, difficulty, limit = 10, title } = body;
+    const { quizId, category, difficulty, limit, title } = body;
 
     const session = await auth();
     if (session?.user?.id) {
@@ -52,7 +52,7 @@ export async function POST(req: Request) {
       quizId,
       category,
       difficulty,
-      limit: typeof limit === "number" ? limit : 10,
+      limit: typeof limit === "number" && limit > 0 ? limit : undefined,
     });
 
     return NextResponse.json({

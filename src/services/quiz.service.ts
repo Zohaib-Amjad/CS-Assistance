@@ -93,7 +93,6 @@ export async function getQuizQuestionsSanitized(params?: {
   difficulty?: string;
   limit?: number;
 }): Promise<SanitizedQuestion[]> {
-  const limit = params?.limit || 10;
   let allQuestions = (await db.query.quizQuestions.findMany()) as any[];
 
   if (params?.quizId && params.quizId !== "all") {
@@ -117,6 +116,7 @@ export async function getQuizQuestionsSanitized(params?: {
     allQuestions = (await db.query.quizQuestions.findMany()) as any[];
   }
 
+  const limit = params?.limit && params.limit > 0 ? params.limit : allQuestions.length;
   const randomizedQuestions = shuffleArray(allQuestions).slice(0, limit);
 
   return randomizedQuestions.map((q: any) => {

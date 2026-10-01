@@ -184,6 +184,7 @@ export default function QuizPage() {
     const targetQuizId = quizId || quizzes[0]?.id || "quiz-phishing";
     const targetQuiz = quizzes.find((q) => q.id === targetQuizId);
     const quizTitle = title || targetQuiz?.title || "Cyber Defense Challenge";
+    const targetQuestionCount = targetQuiz?.questionCount || 15;
 
     setActiveQuizId(targetQuizId);
     setActiveQuizTitle(quizTitle);
@@ -201,7 +202,7 @@ export default function QuizPage() {
           category: selectedCategory !== "All" ? selectedCategory : undefined,
           difficulty: selectedDifficulty !== "All" ? selectedDifficulty : undefined,
           title: quizTitle,
-          limit: 10,
+          limit: targetQuestionCount,
         }),
       });
 
