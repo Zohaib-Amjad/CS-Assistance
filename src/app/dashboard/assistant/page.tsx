@@ -56,9 +56,22 @@ interface Conversation {
 const DEFAULT_SUGGESTIONS = [
   "What is phishing?",
   "How can I stay safe?",
-  "Why is Multi-Factor Authentication important?",
-  "What is Zero Trust security?",
-  "How do I secure my home Wi-Fi?",
+  "Why is Multi-Factor Authentication essential?",
+  "What is Zero Trust security architecture?",
+  "What is the difference between a password and a passphrase?",
+  "How does ransomware spread and how to prevent it?",
+  "What are Passkeys (FIDO2 / WebAuthn)?",
+  "How do I secure my home and public Wi-Fi?",
+  "How does SQL Injection work and how to mitigate it?",
+  "What is Cross-Site Scripting (XSS)?",
+  "How do I protect against Business Email Compromise (BEC)?",
+  "What is Server-Side Request Forgery (SSRF)?",
+  "How does a VPN protect my network traffic?",
+  "What are the indicators of Social Engineering & Vishing?",
+  "How does HaveIBeenPwned k-anonymity check passwords safely?",
+  "What is Defense-in-Depth cybersecurity strategy?",
+  "How do DDoS attacks work and how are they mitigated?",
+  "How can I audit and improve my security score?",
 ];
 
 function formatTimeOnly(dateInput: number | string | Date | undefined): string {
@@ -640,17 +653,17 @@ export default function AssistantPage() {
 
                     {/* Suggested follow-up chips under assistant bubble */}
                     {!isUser && followUps.length > 0 && (
-                      <div className="pt-2 mt-2 border-t border-border/70 space-y-1.5">
+                      <div className="pt-2.5 mt-2 border-t border-border/70 space-y-1.5 max-w-full overflow-hidden">
                         <p className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1">
                           <Lightbulb className="h-3 w-3 text-amber-500" /> Suggested questions:
                         </p>
-                        <div className="flex flex-wrap gap-1.5">
+                        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full scrollbar-thin">
                           {followUps.map((p, idx) => (
                             <button
                               key={idx}
                               onClick={() => handleSend(p)}
                               disabled={loading}
-                              className="text-[11px] px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100 dark:hover:bg-indigo-900 transition-colors text-left font-medium"
+                              className="shrink-0 whitespace-nowrap text-[11px] px-3 py-1.5 rounded-xl bg-indigo-50/90 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800/80 hover:bg-indigo-100 dark:hover:bg-indigo-900 shadow-2xs hover:shadow-xs transition-all text-left font-medium"
                             >
                               {p}
                             </button>
@@ -730,8 +743,8 @@ export default function AssistantPage() {
           </div>
 
           {/* Quick Suggested Prompts Bar */}
-          <div className="px-4 py-2 border-t border-border bg-slate-50/70 dark:bg-slate-900/50 overflow-x-auto flex items-center gap-2 shrink-0">
-            <span className="text-[11px] font-semibold text-muted-foreground shrink-0 flex items-center gap-1">
+          <div className="px-4 py-2.5 border-t border-border bg-slate-50/80 dark:bg-slate-900/60 overflow-x-auto flex items-center gap-2 shrink-0 scrollbar-thin">
+            <span className="text-[11px] font-semibold text-muted-foreground shrink-0 flex items-center gap-1.5 mr-1">
               <Sparkles className="h-3.5 w-3.5 text-indigo-500" /> Quick Questions:
             </span>
             {DEFAULT_SUGGESTIONS.map((prompt, idx) => (
@@ -739,7 +752,7 @@ export default function AssistantPage() {
                 key={idx}
                 onClick={() => handleSend(prompt)}
                 disabled={loading}
-                className="shrink-0 text-xs text-muted-foreground hover:text-indigo-600 dark:hover:text-indigo-400 bg-card px-2.5 py-1 rounded-lg border border-border hover:border-indigo-300 dark:hover:border-indigo-700 transition-colors"
+                className="shrink-0 whitespace-nowrap text-xs text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 bg-card px-3 py-1.5 rounded-xl border border-border hover:border-indigo-300 dark:hover:border-indigo-700 shadow-2xs hover:shadow-xs transition-all font-medium"
               >
                 {prompt}
               </button>
