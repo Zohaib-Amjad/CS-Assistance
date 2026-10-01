@@ -153,6 +153,26 @@ export default function QuizPage() {
     };
   }, [timerRunning, quizState]);
 
+  // Exit quiz and return cleanly to the main challenges screen
+  const handleExitToDashboard = useCallback(() => {
+    setQuizState("start");
+    setTimerRunning(false);
+    setEvaluation(null);
+    setSelectedAnswers({});
+    setCurrentIndex(0);
+  }, []);
+
+  // Intercept browser back button when quiz is in-progress/results to return to quiz dashboard
+  useEffect(() => {
+    const handlePopState = () => {
+      if (quizState === "in_progress" || quizState === "results") {
+        handleExitToDashboard();
+      }
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [quizState, handleExitToDashboard]);
+
   // Start a new quiz session
   const handleStartQuiz = async (quizId?: string, title?: string) => {
     setLoadingQuestions(true);
@@ -167,6 +187,10 @@ export default function QuizPage() {
 
     setActiveQuizId(targetQuizId);
     setActiveQuizTitle(quizTitle);
+
+    if (typeof window !== "undefined") {
+      window.history.pushState({ quizView: "in_progress" }, "");
+    }
 
     try {
       const res = await fetch("/api/quiz/start", {
@@ -359,9 +383,20 @@ export default function QuizPage() {
       <div className="max-w-3xl mx-auto py-4 sm:py-8 space-y-6">
         {/* Main Quiz Card */}
         <Card className="rounded-3xl border border-border bg-card/95 backdrop-blur-md p-6 sm:p-9 shadow-lg space-y-6">
-          {/* Header Row: Number Badge "9." + "Cyber Quiz" and Category/Difficulty */}
+          {/* Header Row: Back Button + Number Badge "9." + "Cyber Quiz" and Category/Difficulty */}
           <div className="flex items-center justify-between gap-4 border-b border-border/60 pb-5">
             <div className="flex items-center gap-3">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleExitToDashboard}
+                className="h-8 px-2.5 rounded-xl text-xs text-muted-foreground hover:text-foreground hover:bg-slate-100 dark:hover:bg-slate-800 gap-1.5 font-semibold"
+                title="Return to Quiz Dashboard"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                <span className="hidden sm:inline">Exit Quiz</span>
+              </Button>
+              <div className="h-4 w-px bg-border/80 hidden sm:block" />
               <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-600 text-white font-black text-sm shadow-md shadow-indigo-500/30">
                 9.
               </span>
