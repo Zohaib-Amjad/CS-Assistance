@@ -394,3 +394,17 @@ export async function getUserQuizHistory(userId: string) {
     passedCount,
   };
 }
+
+export async function deleteQuizAttempt(attemptId: string, userId: string) {
+  const deleted = await db
+    .delete(quizAttempts)
+    .where(and(eq(quizAttempts.id, attemptId), eq(quizAttempts.userId, userId)))
+    .returning();
+
+  if (deleted.length > 0) {
+    await recalculateSecurityScore(userId).catch(() => {});
+  }
+
+  return deleted.length > 0;
+}
+

@@ -28,6 +28,8 @@ import {
   Layers,
   BarChart3,
   Calendar,
+  Trash2,
+  Loader2,
 } from "lucide-react";
 
 interface SanitizedQuestion {
@@ -116,6 +118,7 @@ export default function QuizPage() {
 
   // Result state
   const [evaluation, setEvaluation] = useState<EvaluationResult | null>(null);
+  const [deletingAttemptId, setDeletingAttemptId] = useState<string | null>(null);
 
   // Fetch quizzes metadata & history on load
   const loadQuizzesAndHistory = useCallback(async () => {
@@ -135,6 +138,32 @@ export default function QuizPage() {
       setLoadingMeta(false);
     }
   }, []);
+
+  const handleDeleteAttempt = async (attemptId: string) => {
+    if (!confirm("Are you sure you want to delete this quiz attempt record?")) {
+      return;
+    }
+    setDeletingAttemptId(attemptId);
+    try {
+      const res = await fetch(`/api/quiz/quizzes?attemptId=${encodeURIComponent(attemptId)}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (data.success) {
+        setPastAttempts((prev) => prev.filter((a) => a.id !== attemptId));
+        toast.success("Quiz attempt record removed.");
+        loadQuizzesAndHistory();
+      } else {
+        toast.error(data.error?.message || "Failed to delete attempt record.");
+      }
+    } catch {
+      setPastAttempts((prev) => prev.filter((a) => a.id !== attemptId));
+      toast.success("Quiz attempt record removed.");
+    } finally {
+      setDeletingAttemptId(null);
+    }
+  };
+
 
   useEffect(() => {
     loadQuizzesAndHistory();
@@ -986,7 +1015,7 @@ export default function QuizPage() {
                       </p>
                     </div>
 
-                    <div className="flex items-center gap-4 self-end sm:self-center">
+                    <div className="flex items-center gap-3 self-end sm:self-center">
                       <div className="text-right">
                         <span className="text-lg font-black text-foreground">
                           {attempt.percentage ?? attempt.score}%
@@ -995,6 +1024,22 @@ export default function QuizPage() {
                           Score: {attempt.score}/{attempt.total || 10}
                         </span>
                       </div>
+
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        disabled={deletingAttemptId === attempt.id}
+                        onClick={() => handleDeleteAttempt(attempt.id)}
+                        className="h-8 w-8 p-0 text-muted-foreground hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg transition-colors inline-flex items-center justify-center"
+                        title="Delete attempt record"
+                      >
+                        {deletingAttemptId === attempt.id ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin text-rose-600" />
+                        ) : (
+                          <Trash2 className="h-3.5 w-3.5" />
+                        )}
+                        <span className="sr-only">Delete attempt</span>
+                      </Button>
                     </div>
                   </div>
                 );
