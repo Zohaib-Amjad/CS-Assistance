@@ -396,37 +396,49 @@ export class GeminiAIProvider implements AIProvider {
         parts: [{ text: `${CYBER_ASSISTANT_SYSTEM_PROMPT}\n\nUser Question:\n${prompt}` }],
       });
 
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${this.apiKey}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents,
-            generationConfig: {
-              temperature: 0.7,
-              maxOutputTokens: 1200,
-            },
-          }),
-        }
-      );
+      const modelsToTry = ["gemini-3.8-flash", "gemini-3.5-flash", "gemini-flash-latest", "gemini-2.5-flash"];
+      let textResponse: string | null = null;
 
-      if (!res.ok) {
-        const errText = await res.text();
-        console.warn("Gemini API request failed, falling back to mock engine:", errText);
-        return new MockAIProvider().answerCyberQuestion(prompt, history);
+      for (const model of modelsToTry) {
+        try {
+          const res = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "x-goog-api-key": this.apiKey,
+              },
+              body: JSON.stringify({
+                contents,
+                generationConfig: {
+                  temperature: 0.7,
+                  maxOutputTokens: 1200,
+                },
+              }),
+            }
+          );
+
+          if (res.ok) {
+            const data = await res.json();
+            const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (text) {
+              textResponse = text;
+              break;
+            }
+          }
+        } catch {
+          // Try next model
+        }
       }
 
-      const data = await res.json();
-      const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-      if (!text) {
+      if (!textResponse) {
         return new MockAIProvider().answerCyberQuestion(prompt, history);
       }
 
       return {
         source: "gemini",
-        content: text,
+        content: textResponse,
         suggestedFollowUps: [
           "Can you give an example of this in practice?",
           "What are the best defense steps against this?",
@@ -442,10 +454,13 @@ export class GeminiAIProvider implements AIProvider {
   async analyzeEmail(emailContent: string): Promise<AIEmailAnalysisResponse> {
     try {
       const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${this.apiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "x-goog-api-key": this.apiKey,
+          },
           body: JSON.stringify({
             contents: [
               {
