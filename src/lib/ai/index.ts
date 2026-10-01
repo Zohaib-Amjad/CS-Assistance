@@ -370,14 +370,226 @@ export class MockAIProvider implements AIProvider {
   }
 }
 
+export class GeminiAIProvider implements AIProvider {
+  name: "gemini" = "gemini";
+  private apiKey: string;
+
+  constructor(apiKey: string) {
+    this.apiKey = apiKey;
+  }
+
+  async answerCyberQuestion(prompt: string, history?: AIChatMessage[]): Promise<AIChatResponse> {
+    try {
+      const contents: Array<{ role: string; parts: Array<{ text: string }> }> = [];
+
+      if (history && history.length > 0) {
+        for (const msg of history.slice(-6)) {
+          contents.push({
+            role: msg.role === "assistant" ? "model" : "user",
+            parts: [{ text: msg.content }],
+          });
+        }
+      }
+
+      contents.push({
+        role: "user",
+        parts: [{ text: `${CYBER_ASSISTANT_SYSTEM_PROMPT}\n\nUser Question:\n${prompt}` }],
+      });
+
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${this.apiKey}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents,
+            generationConfig: {
+              temperature: 0.7,
+              maxOutputTokens: 1200,
+            },
+          }),
+        }
+      );
+
+      if (!res.ok) {
+        const errText = await res.text();
+        console.warn("Gemini API request failed, falling back to mock engine:", errText);
+        return new MockAIProvider().answerCyberQuestion(prompt, history);
+      }
+
+      const data = await res.json();
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+      if (!text) {
+        return new MockAIProvider().answerCyberQuestion(prompt, history);
+      }
+
+      return {
+        source: "gemini",
+        content: text,
+        suggestedFollowUps: [
+          "Can you give an example of this in practice?",
+          "What are the best defense steps against this?",
+          "How can I audit or test this safely?",
+        ],
+      };
+    } catch (err) {
+      console.warn("Gemini query exception, falling back to mock:", err);
+      return new MockAIProvider().answerCyberQuestion(prompt, history);
+    }
+  }
+
+  async analyzeEmail(emailContent: string): Promise<AIEmailAnalysisResponse> {
+    try {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${this.apiKey}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [
+              {
+                role: "user",
+                parts: [
+                  {
+                    text: `Analyze this email for phishing threats. Return JSON only matching schema: {"classification": "safe"|"suspicious"|"malicious", "riskScore": 0-100, "confidence": 0.0-1.0, "indicators": string[], "recommendations": string[], "reasoning": string}.\n\nEmail Content:\n${emailContent}`,
+                  },
+                ],
+              },
+            ],
+            generationConfig: {
+              responseMimeType: "application/json",
+            },
+          }),
+        }
+      );
+
+      if (res.ok) {
+        const data = await res.json();
+        const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (text) {
+          const parsed = JSON.parse(text);
+          return {
+            classification: parsed.classification || "suspicious",
+            riskScore: parsed.riskScore ?? 50,
+            confidence: parsed.confidence ?? 0.85,
+            indicators: parsed.indicators ?? [],
+            recommendations: parsed.recommendations ?? [],
+            reasoning: parsed.reasoning || "AI assessment completed.",
+          };
+        }
+      }
+    } catch (err) {
+      console.warn("Gemini analyzeEmail exception, fallback to mock heuristics:", err);
+    }
+
+    return new MockAIProvider().analyzeEmail(emailContent);
+  }
+}
+
+export class OpenAILikeProvider implements AIProvider {
+  name: "openai" = "openai";
+  private apiKey: string;
+  private endpoint: string;
+  private model: string;
+
+  constructor(
+    apiKey: string,
+    endpoint = "https://api.openai.com/v1/chat/completions",
+    model = "gpt-4o-mini"
+  ) {
+    this.apiKey = apiKey;
+    this.endpoint = endpoint;
+    this.model = model;
+  }
+
+  async answerCyberQuestion(prompt: string, history?: AIChatMessage[]): Promise<AIChatResponse> {
+    try {
+      const messages: Array<{ role: string; content: string }> = [
+        { role: "system", content: CYBER_ASSISTANT_SYSTEM_PROMPT },
+      ];
+
+      if (history && history.length > 0) {
+        for (const msg of history.slice(-6)) {
+          messages.push({ role: msg.role, content: msg.content });
+        }
+      }
+
+      messages.push({ role: "user", content: prompt });
+
+      const res = await fetch(this.endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${this.apiKey}`,
+        },
+        body: JSON.stringify({
+          model: this.model,
+          messages,
+          temperature: 0.7,
+        }),
+      });
+
+      if (!res.ok) {
+        return new MockAIProvider().answerCyberQuestion(prompt, history);
+      }
+
+      const data = await res.json();
+      const text = data.choices?.[0]?.message?.content;
+
+      if (!text) {
+        return new MockAIProvider().answerCyberQuestion(prompt, history);
+      }
+
+      return {
+        source: "openai",
+        content: text,
+        suggestedFollowUps: [
+          "Can you provide a practical example?",
+          "How can I defend against this vulnerability?",
+          "What are the key security takeaways?",
+        ],
+      };
+    } catch {
+      return new MockAIProvider().answerCyberQuestion(prompt, history);
+    }
+  }
+
+  async analyzeEmail(emailContent: string): Promise<AIEmailAnalysisResponse> {
+    return new MockAIProvider().analyzeEmail(emailContent);
+  }
+}
+
 /**
  * Factory that returns the configured AI provider based on available environment variables.
  */
 export function getAIProvider(): AIProvider {
-  // Can be extended with OpenAI / Gemini / Anthropic SDK bindings when API keys are configured.
-  // Defaults reliably to the built-in offline MockAIProvider.
+  const geminiKey =
+    process.env.GEMINI_API_KEY ||
+    process.env.GOOGLE_GENERATIVE_AI_API_KEY ||
+    process.env.GOOGLE_API_KEY;
+  if (geminiKey) {
+    return new GeminiAIProvider(geminiKey);
+  }
+
+  const groqKey = process.env.GROQ_API_KEY;
+  if (groqKey) {
+    return new OpenAILikeProvider(
+      groqKey,
+      "https://api.groq.com/openai/v1/chat/completions",
+      "llama-3.1-70b-versatile"
+    );
+  }
+
+  const openaiKey = process.env.OPENAI_API_KEY;
+  if (openaiKey) {
+    return new OpenAILikeProvider(openaiKey, "https://api.openai.com/v1/chat/completions", "gpt-4o-mini");
+  }
+
+  // Built-in offline resilient MockAIProvider
   return new MockAIProvider();
 }
+
 
 /**
  * Evaluates an email using both heuristic rules and AI provider analysis, blending scores.
