@@ -27,6 +27,7 @@ import {
   Copy,
   CheckCircle2,
   SlidersHorizontal,
+  Circle,
 } from "lucide-react";
 import {
   evaluatePasswordStrength,
@@ -158,7 +159,8 @@ export default function PasswordCheckerPage() {
     }
   };
 
-  const isStrong = analysis.score >= 75 || analysis.label === "Strong" || analysis.label === "Very Strong";
+  const isStrong = Boolean(password) && (analysis.score >= 75 || analysis.label === "Strong" || analysis.label === "Very Strong");
+  const hasStarted = Boolean(password && password.length > 0);
 
   // Segmented meter active blocks (1 to 5)
   const getSegmentCount = () => {
@@ -481,7 +483,9 @@ export default function PasswordCheckerPage() {
 
                 <div className="flex items-center justify-between p-2 rounded-lg bg-card border border-border">
                   <span className="text-foreground">Use a mix of letters, numbers, and symbols</span>
-                  {analysis.hasUppercase && analysis.hasLowercase && analysis.hasNumbers && analysis.hasSymbols ? (
+                  {!hasStarted ? (
+                    <Circle className="h-3.5 w-3.5 text-muted-foreground/30" />
+                  ) : analysis.hasUppercase && analysis.hasLowercase && analysis.hasNumbers && analysis.hasSymbols ? (
                     <Check className="h-4 w-4 text-emerald-500 font-bold" />
                   ) : (
                     <X className="h-4 w-4 text-rose-500" />
@@ -490,7 +494,9 @@ export default function PasswordCheckerPage() {
 
                 <div className="flex items-center justify-between p-2 rounded-lg bg-card border border-border">
                   <span className="text-foreground">Avoid using personal information</span>
-                  {analysis.hasNoDates && analysis.hasNoCommonWords ? (
+                  {!hasStarted ? (
+                    <Circle className="h-3.5 w-3.5 text-muted-foreground/30" />
+                  ) : analysis.hasNoDates && analysis.hasNoCommonWords ? (
                     <Check className="h-4 w-4 text-emerald-500 font-bold" />
                   ) : (
                     <X className="h-4 w-4 text-rose-500" />
@@ -499,7 +505,9 @@ export default function PasswordCheckerPage() {
 
                 <div className="flex items-center justify-between p-2 rounded-lg bg-card border border-border">
                   <span className="text-foreground">Use a longer passphrase (12+ characters)</span>
-                  {analysis.hasMinLength ? (
+                  {!hasStarted ? (
+                    <Circle className="h-3.5 w-3.5 text-muted-foreground/30" />
+                  ) : password.length >= 12 ? (
                     <Check className="h-4 w-4 text-emerald-500 font-bold" />
                   ) : (
                     <X className="h-4 w-4 text-rose-500" />
@@ -508,7 +516,9 @@ export default function PasswordCheckerPage() {
 
                 <div className="flex items-center justify-between p-2 rounded-lg bg-card border border-border">
                   <span className="text-foreground">No sequential or repeated patterns</span>
-                  {analysis.hasNoRepeats && analysis.hasNoSequences ? (
+                  {!hasStarted ? (
+                    <Circle className="h-3.5 w-3.5 text-muted-foreground/30" />
+                  ) : analysis.hasNoRepeats && analysis.hasNoSequences ? (
                     <Check className="h-4 w-4 text-emerald-500 font-bold" />
                   ) : (
                     <X className="h-4 w-4 text-rose-500" />
