@@ -19,8 +19,8 @@
     --secondary: 262 83% 58%;      /* #7C3AED */
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 215 16% 47%;          /* #64748B */
-    --muted-foreground: 215 16% 47%;
+    --muted: 220 14% 96%;          /* #F1F5F9 - High contrast soft neutral */
+    --muted-foreground: 215 16% 47%; /* #64748B - Clear readable slate text */
 
     --accent: 239 84% 67%;         /* #6366F1 */
     --accent-foreground: 0 0% 100%;

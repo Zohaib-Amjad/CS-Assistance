@@ -813,17 +813,17 @@ export default function QuizPage() {
           </div>
 
           {/* Filters */}
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2.5">
             {/* Category Filter */}
-            <div className="flex items-center gap-1 overflow-x-auto pb-1 sm:pb-0">
+            <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-100 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/60 overflow-x-auto max-w-full">
               {uniqueCategories.map((cat) => (
                 <button
                   key={cat}
                   onClick={() => setSelectedCategory(cat)}
-                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
                     selectedCategory === cat
                       ? "bg-indigo-600 text-white shadow-xs"
-                      : "bg-muted text-muted-foreground hover:text-foreground"
+                      : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/80 dark:hover:bg-slate-700/60"
                   }`}
                 >
                   {cat}
@@ -832,15 +832,15 @@ export default function QuizPage() {
             </div>
 
             {/* Difficulty Filter */}
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-100 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/60">
               {uniqueDifficulties.map((diff) => (
                 <button
                   key={diff}
                   onClick={() => setSelectedDifficulty(diff)}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all capitalize ${
                     selectedDifficulty === diff
-                      ? "bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900"
-                      : "bg-muted/70 text-muted-foreground hover:text-foreground"
+                      ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 shadow-xs"
+                      : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/80 dark:hover:bg-slate-700/60"
                   }`}
                 >
                   {diff}
