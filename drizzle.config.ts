@@ -1,6 +1,10 @@
 import { defineConfig } from "drizzle-kit";
 import * as dotenv from "dotenv";
 
+// Next.js loads `.env.local`, but Drizzle Kit only reads `.env` by default.
+// Load the local Next.js environment first so schema commands target Turso
+// when its credentials are stored in `.env.local`.
+dotenv.config({ path: ".env.local" });
 dotenv.config();
 
 export default defineConfig({

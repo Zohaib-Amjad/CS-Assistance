@@ -5,6 +5,10 @@ import { Providers } from "@/components/providers";
 
 const inter = Inter({ subsets: ["latin"] });
 
+// Pages read user and scan data from the database. Keep them server rendered
+// so a deployment build never snapshots empty or environment-specific data.
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "CyberGuard AI — AI-Powered Cyber Security Assistant",
   description: "A defensive cybersecurity education platform featuring AI phishing detection, SSRF-safe URL scanning, client-side password audits, interactive quizzes, and security guidance.",

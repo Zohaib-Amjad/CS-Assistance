@@ -16,7 +16,9 @@ const remoteDatabaseUrl = [
 // copied into Vercel. Always use a configured Turso URL there; never try to
 // open the bundled SQLite file in a read-only serverless function.
 const selectedDatabaseUrl = isVercel
-  ? remoteDatabaseUrl || (isProductionBuild ? "file:./cyberguard.db" : undefined)
+  // Never contact the production database while Next.js is collecting page
+  // data during `next build`. Vercel injects the remote URL again at runtime.
+  ? (isProductionBuild ? "file:./cyberguard.db" : remoteDatabaseUrl)
   : process.env.TURSO_DATABASE_URL ||
     process.env.DATABASE_URL ||
     "file:./cyberguard.db";
