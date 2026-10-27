@@ -73,7 +73,7 @@ Turso provides a distributed, cloud-hosted SQLite database via the open-source *
 | `NEXTAUTH_URL` | Your production custom domain or Vercel URL | `https://cyberguard.vercel.app` |
 | `NEXT_PUBLIC_APP_URL` | Public application URL | `https://cyberguard.vercel.app` |
 | `NEXTAUTH_SECRET` | 32+ character random secret string | `openssl rand -base64 32` |
-| `DATABASE_URL` | Turso libSQL connection URL | `libsql://cyberguard-prod-youruser.turso.io` |
+| `TURSO_DATABASE_URL` | Turso libSQL connection URL (takes precedence over any local `DATABASE_URL`) | `libsql://cyberguard-prod-youruser.turso.io` |
 | `TURSO_AUTH_TOKEN` | Turso authentication token | `eyJhbGciOiJFZERTQ...` |
 | `GEMINI_API_KEY` | Google AI Studio API Key | `AIzaSy...` |
 | `BLOB_READ_WRITE_TOKEN` | (Optional) Vercel Blob token for avatars | Auto-injected by Vercel |

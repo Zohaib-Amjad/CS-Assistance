@@ -1,11 +1,39 @@
 import * as schema from "./schema";
 import path from "path";
 
-const databaseUrl =
-  process.env.DATABASE_URL ||
-  process.env.TURSO_DATABASE_URL ||
-  "file:./cyberguard.db";
+const isRemoteDatabaseUrl = (url: string | undefined): boolean =>
+  Boolean(url && (url.startsWith("libsql://") || url.startsWith("https://")));
+
+const isVercel = process.env.VERCEL === "1";
+const isProductionBuild = process.env.NEXT_PHASE === "phase-production-build";
 const authToken = process.env.TURSO_AUTH_TOKEN;
+const remoteDatabaseUrl = [
+  process.env.TURSO_DATABASE_URL,
+  process.env.DATABASE_URL,
+].find(isRemoteDatabaseUrl);
+
+// A local file: DATABASE_URL is common in development and can accidentally be
+// copied into Vercel. Always use a configured Turso URL there; never try to
+// open the bundled SQLite file in a read-only serverless function.
+const selectedDatabaseUrl = isVercel
+  ? remoteDatabaseUrl || (isProductionBuild ? "file:./cyberguard.db" : undefined)
+  : process.env.TURSO_DATABASE_URL ||
+    process.env.DATABASE_URL ||
+    "file:./cyberguard.db";
+
+if (!selectedDatabaseUrl) {
+  throw new Error(
+    "Production database is not configured. Set TURSO_DATABASE_URL (or DATABASE_URL) to a Turso libSQL URL and provide TURSO_AUTH_TOKEN in Vercel.",
+  );
+}
+
+if (isVercel && !isProductionBuild && remoteDatabaseUrl && !authToken) {
+  throw new Error(
+    "Turso database authentication is not configured. Set TURSO_AUTH_TOKEN in Vercel.",
+  );
+}
+
+const databaseUrl: string = selectedDatabaseUrl;
 
 function initDirectSqliteTables(sqlite: any) {
   const statements = [
@@ -273,7 +301,7 @@ function initDirectSqliteTables(sqlite: any) {
 }
 
 function initDb() {
-  if (databaseUrl.startsWith("libsql://") || databaseUrl.startsWith("https://") || (authToken && authToken.length > 0)) {
+  if (isRemoteDatabaseUrl(databaseUrl)) {
     const { createClient } = require("@libsql/client/web");
     const { drizzle } = require("drizzle-orm/libsql");
     const client = createClient({
