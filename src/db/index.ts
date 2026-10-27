@@ -1,7 +1,10 @@
 import * as schema from "./schema";
 import path from "path";
 
-const databaseUrl = process.env.TURSO_DATABASE_URL || "file:./cyberguard.db";
+const databaseUrl =
+  process.env.DATABASE_URL ||
+  process.env.TURSO_DATABASE_URL ||
+  "file:./cyberguard.db";
 const authToken = process.env.TURSO_AUTH_TOKEN;
 
 function initDirectSqliteTables(sqlite: any) {

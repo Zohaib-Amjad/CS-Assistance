@@ -2,6 +2,8 @@ import type { NextAuthConfig } from "next-auth";
 
 export const authConfig = {
   secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
+  trustHost:
+    process.env.AUTH_TRUST_HOST === "true" || process.env.VERCEL === "1",
   session: {
     strategy: "jwt",
   },
