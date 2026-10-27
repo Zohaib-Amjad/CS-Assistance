@@ -4,7 +4,7 @@ import React, { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
-import { Eye, EyeOff, Lock, Mail, ArrowRight, Sparkles } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -64,13 +64,6 @@ function LoginForm() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const autofill = (fillEmail: string, fillPass: string) => {
-    setEmail(fillEmail);
-    setPassword(fillPass);
-    setErrorMsg("");
-    toast.info(`Filled credentials for ${fillEmail}`);
   };
 
   const handleOAuth = (provider: string) => {
@@ -183,29 +176,6 @@ function LoginForm() {
           </Button>
         </form>
 
-        {/* Quick Demo Autofill Pills */}
-        <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-2 mt-4">
-          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-300">
-            <Sparkles className="h-3.5 w-3.5 text-indigo-500" />
-            <span>1-Click Demo Accounts:</span>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={() => autofill("admin@cyberguard.ai", "admin123")}
-              className="px-2.5 py-1 rounded-lg bg-violet-50 text-violet-700 dark:bg-violet-950/50 dark:text-violet-300 text-xs font-semibold hover:bg-violet-100 transition-colors border border-violet-200 dark:border-violet-800"
-            >
-              Admin Demo (admin@cyberguard.ai)
-            </button>
-            <button
-              type="button"
-              onClick={() => autofill("user@cyberguard.ai", "user123")}
-              className="px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-300 text-xs font-semibold hover:bg-indigo-100 transition-colors border border-indigo-200 dark:border-indigo-800"
-            >
-              User Demo (user@cyberguard.ai)
-            </button>
-          </div>
-        </div>
       </CardContent>
 
       <CardFooter className="flex justify-center border-t border-slate-100 dark:border-slate-800 pt-4 text-xs text-slate-500 dark:text-slate-400">
