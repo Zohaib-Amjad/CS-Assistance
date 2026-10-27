@@ -3,7 +3,6 @@
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
 import { Eye, EyeOff, Lock, Mail, User, Check, X, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -64,22 +63,8 @@ export default function SignupPage() {
         return;
       }
 
-      toast.success("Account created successfully! Signing you in...");
-
-      // Automatically sign in with credentials
-      const signInRes = await signIn("credentials", {
-        redirect: false,
-        redirectTo: "/dashboard",
-        email: email.trim(),
-        password,
-      });
-
-      if (signInRes?.error) {
-        router.push("/login");
-      } else {
-        router.push("/dashboard");
-        router.refresh();
-      }
+      toast.success("Account created successfully. Please sign in to continue.");
+      router.push("/login?registered=1");
     } catch {
       setErrorMsg("An error occurred during registration. Please try again.");
       toast.error("An error occurred during registration.");
