@@ -194,7 +194,7 @@ export default function QuizPage() {
   // Intercept browser back button when quiz is in-progress/results to return to quiz dashboard
   useEffect(() => {
     const handlePopState = () => {
-      if (quizState === "in_progress" || quizState === "results") {
+      if (quizState === "in_progress" || quizState === "completed") {
         handleExitToDashboard();
       }
     };

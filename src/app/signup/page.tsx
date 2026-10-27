@@ -69,6 +69,7 @@ export default function SignupPage() {
       // Automatically sign in with credentials
       const signInRes = await signIn("credentials", {
         redirect: false,
+        redirectTo: "/dashboard",
         email: email.trim(),
         password,
       });

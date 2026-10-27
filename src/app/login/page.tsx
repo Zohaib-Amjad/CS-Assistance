@@ -33,6 +33,7 @@ function LoginForm() {
     try {
       const res = await signIn("credentials", {
         redirect: false,
+        redirectTo: callbackUrl,
         email: email.trim(),
         password,
       });
